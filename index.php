@@ -8,7 +8,6 @@
 require 'func.php';
 require 'Template.php';
 
-$temp = new Template('crawler.html');
 
 $hello = new StdClass();
 $hello->world = 'Hello World';
@@ -17,10 +16,6 @@ $user = new StdClass();
 $user->name = 'Attila';
 $user->email = 'poroszkai.attila@gmail.com';
 
-$objs = [
-    'hello' => $hello,
-    'user' => $user,
-];
 
 // datas
 $datas = [
@@ -35,14 +30,16 @@ $datas = [
     'selector1' => 'This is selector',
     'firstOption' => 'awdawdawdawdawd',
     'greetings' => 'Welcomme',
+    //'hello' => $hello,
+    'user' => $user,
 ];
 
 $pla = 'hello.world';
 
-var_dump($temp->objectPlaceholder($pla));
+//$datas = [];
 
+$temp = new Template('crawler.html', $datas);
 
-$temp->setDatas($datas, $objs);
 
 
 $temp->render();

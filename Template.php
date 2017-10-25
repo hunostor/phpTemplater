@@ -12,7 +12,6 @@ class Template
     private $fileIncludePattern = '/^@include:/';
 
     private $datas;
-    private $objs;
 
     private $template;
 
@@ -20,22 +19,11 @@ class Template
      * Template constructor.
      * @param $fileContents
      */
-    public function __construct($fileContents)
+    public function __construct($fileContents, array $datas)
     {
         $this->html = file_get_contents($fileContents);
-        $this->template = $this->unionTemplateFiles($this->html);
-        //$placeholders = $this->getRawPlaceholders($this->html);
-    }
-
-    /**
-     * @param mixed $datas
-     */
-    public function setDatas(array $datas, array $objs)
-    {
         $this->datas = $datas;
-        $this->objs = $objs;
-
-        return $this;
+        $this->template = $this->unionTemplateFiles($this->html);
     }
 
     private function escaping($string)
@@ -43,7 +31,7 @@ class Template
         return htmlspecialchars($string);
     }
 
-    private function getRawPlaceholders(string $html): array
+    private function getRawPlaceholders($html)
     {
         $split = explode('{{', $html);
         $count = count($split);
@@ -59,7 +47,7 @@ class Template
         return $rawPlaceholders;
     }
 
-    private function fileUrl(string $placeholder)
+    private function fileUrl($placeholder)
     {
         $pattern = $this->fileIncludePattern;
 
@@ -97,10 +85,9 @@ class Template
         return $html;
     }
 
-    private function templateDataDrive(array $datas, array $objs)
+    private function templateDataDrive(array $datas)
     {
         extract($datas);
-        extract($objs);
 
         $split = explode('{{', $this->template);
         $count = count($split);
@@ -111,10 +98,10 @@ class Template
             $placeholder = $splitArr[0];
             $key = trim($placeholder);
 
-            if ($object = $this->objectPlaceholder($key))
+            if ($objPlaceholder = $this->objectPlaceholder($key))
             {
                 $this->template   = str_replace('{{' . $placeholder . '}}',
-                    $this->escaping(${$object[0]}->{$object[1]}),
+                    $this->escaping( ${$objPlaceholder[0]}->{$objPlaceholder[1]} ),
                     $this->template
                 );
             }
@@ -144,7 +131,7 @@ class Template
 
     public function render()
     {
-        $this->templateDataDrive($this->datas, $this->objs);
+        $this->templateDataDrive($this->datas);
 
         echo $this->template;
     }
